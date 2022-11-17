@@ -24,6 +24,7 @@ class Tree
   end
 
   def insert(value, node = @root)
+    return if node.data == value
     return node.left = Node.new(value) if node.data > value && node.left.nil?
     return node.right = Node.new(value) if node.data < value && node.right.nil?
 
@@ -31,6 +32,8 @@ class Tree
   end
 
   def delete(value, node = @root)
+    return if node.nil?
+
     if value < node.data
       node.left = delete(value, node.left)
     elsif value > node.data
@@ -95,5 +98,36 @@ class Tree
     postorder(node.left, arr, &block)
     postorder(node.right, arr, &block)
     block_given? ? block.call(node.data) : arr.push(node.data)
+  end
+
+  def height(node, arr = [], count = 0)
+    if node.nil?
+      arr << count - 1
+      return arr.max
+    end
+
+    height(node.left, arr, count + 1)
+    height(node.right, arr, count + 1)
+  end
+
+  def depth(node, root = @root, count = 0)
+    return count - 1 if root.nil?
+
+    root.data < node.data ? depth(node, root.left, count + 1) : depth(node, root.right, count + 1)
+  end
+
+  def balanced?(node = @root, arr = [])
+    return arr.all? { |el| el < 2 } if node.nil?
+
+    left_height = height(node.left)
+    right_height = height(node.right)
+    arr.push((left_height - right_height).abs)
+
+    balanced?(node.left, arr)
+    balanced?(node.right, arr)
+  end
+
+  def rebalance
+    @root = build_tree(inorder)
   end
 end
