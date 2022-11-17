@@ -24,8 +24,8 @@ class Tree
   end
 
   def insert(value, node = @root)
-    return node.left = Node.new(value) if node.data > value && node.left == nil
-    return node.right = Node.new(value) if node.data < value && node.right == nil
+    return node.left = Node.new(value) if node.data > value && node.left.nil?
+    return node.right = Node.new(value) if node.data < value && node.right.nil?
 
     node.data > value ? insert(value, node.left) : insert(value, node.right)
   end
@@ -56,5 +56,44 @@ class Tree
     return node if node.data == value
 
     node.data > value ? find(value, node.left) : find(value, node.right)
+  end
+
+  def level_order(node = @root)
+    queue = []
+    arr = []
+    queue.push node
+
+    until queue.empty?
+      current = queue.first
+      queue.push(current.left) unless current.left.nil?
+      queue.push(current.right) unless current.right.nil?
+      block_given? ? yield(queue.shift.data) : arr.push(queue.shift.data)
+    end
+
+    arr unless block_given?
+  end
+
+  def inorder(node = @root, arr = [], &block)
+    return arr if node.nil?
+
+    inorder(node.left, arr, &block)
+    block_given? ? block.call(node.data) : arr.push(node.data)
+    inorder(node.right, arr, &block)
+  end
+
+  def preorder(node = @root, arr = [], &block)
+    return arr if node.nil?
+
+    block_given? ? block.call(node.data) : arr.push(node.data)
+    preorder(node.left, arr, &block)
+    preorder(node.right, arr, &block)
+  end
+
+  def postorder(node = @root, arr = [], &block)
+    return arr if node.nil?
+
+    postorder(node.left, arr, &block)
+    postorder(node.right, arr, &block)
+    block_given? ? block.call(node.data) : arr.push(node.data)
   end
 end
